@@ -1,7 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/docker-existing-docker-compose
 {
-	"name": "Existing Docker Compose (Extend)",
+	"name": "Jeffcom chat compose (Extend)",
 
 	// Update the 'dockerComposeFile' list if you have more compose files or use different names.
 	// The .devcontainer/docker-compose.yml file contains any overrides you need/want to make.
@@ -18,17 +18,25 @@
 	// connected. This is typically a file mount in .devcontainer/docker-compose.yml
 	//"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 	// "workspaceMount": "src=${localWorkspaceFolder},dst=/workspace,type=bind,consistency=cached",
-	"workspaceFolder": "/my-app/workspace/${localWorkspaceFolderBasename}",
+	"workspaceFolder": "/workspaces/my-app",
+	"forwardPorts": [5000,3000],
 
 	"features": {
 		"ghcr.io/shyim/devcontainers-features/bun:0": {}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"gsppvo.vscode-commandbar"
+			]
+		}
 	}
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
+	// ,"forwardPorts": ["3000:3000"]
 
 	// Uncomment the next line if you want start specific services in your Docker Compose config.
 	// "runServices": [],

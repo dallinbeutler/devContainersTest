@@ -8,8 +8,8 @@ services:
     command: "-c /etc/nats/nats.conf " 
     # --routes=nats://ruser:T0pS3cr3t@nats:6222" # --cluster nats://0.0.0.0:6222 " # "
     ports:
-      - 4222:4222 # regular clients
       - 8222:8222 # http dashboard
+      - 4222:4222 # regular clients
       - 9222:6222 # websockets
     # network_mode: host
 
@@ -21,14 +21,15 @@ services:
     volumes:
       #- ../../:workspaces:cached 
       # - .:/workspace:cached
-      - .:my-app/workspace/chat-app/:cached
+      # - ./chat-app:my-app/workspace/:cached
+      - ./chat-app/:/workspaces/my-app:cached
       #- .:/my-app/workspace:cached
     environment:
       NODE_ENV: development
     ports:
-      - 3000:3000
-      - 5000:5000
-      - 4223:4222
+      - 5000:5000 #http front-end
+      - 3000:3000 #debug port
+      # - 4223:4222 # nats port
     links:
       - nats-service
     #command: bun --bun run dev ./my-app/

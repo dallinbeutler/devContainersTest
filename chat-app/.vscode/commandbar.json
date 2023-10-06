@@ -1,0 +1,16 @@
+{
+  "skipTerminateQuickPick": true,
+  "skipSwitchToOutput": false,
+  "skipErrorMessage": true,
+  "commands": [
+    {
+      "text": "👀 bun run and watch",
+      "tooltip": "bun --bun run dev",
+      "color": "black",
+      "command": "bun --bun run dev",
+      "alignment": "left",
+      "skipTerminateQuickPick": false,
+      "priority": 0
+    }
+  ]
+}
