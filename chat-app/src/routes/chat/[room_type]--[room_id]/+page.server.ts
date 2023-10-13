@@ -4,6 +4,46 @@ import { error } from '@sveltejs/kit';
 import { writable, type Invalidator, type Readable, type Subscriber, type Unsubscriber } from 'svelte/store';
 import { connect, StringCodec, MsgHdrsImpl } from "nats";
 
+
+export function load({ params }:any) {
+	// const encoder = new TextEncoder();
+	// let readable = new ReadableStream({
+	// 	async start(controller) {
+	// 	try{
+	// 		const sc = StringCodec();
+	// 		const nc = await connect({servers: `nats-service:4222`});
+	// 		console.log(`connected to ${nc.getServer()}`);
+	// 		const sub = nc.subscribe("hello");
+	// 		for await (const m of sub) {				
+	// 			let str = sc.decode(m.data)
+	// 			console.log(`[${sub.getProcessed()}]: ${str}`);
+	// 			controller.enqueue(encoder.encode(str));
+	// 		}
+	// 		console.log("subscription closed");
+	// 		nc.close()
+	// 		controller.close()
+	// 		}
+	// 	catch(err){			
+	// 		console.error(err);
+	// 		throw err
+	// 	}
+  //   }
+	// })
+
+
+	
+	//const post = posts.find((post) => post.slug === params.slug);
+
+	if (!params.room_id || !params.room_type) throw error(404);
+  console.log(`loading room id `,params.room_id , `and type `, params.room_type);
+	return {
+		room_type: params.room_type,
+		room_id: params.room_id,
+		//messages:readable
+	}
+}
+
+
 // async function connectToNats(){
 // 	try {
 // 		const nc = await connect({servers: `nats-service:4222`});
@@ -109,15 +149,3 @@ import { connect, StringCodec, MsgHdrsImpl } from "nats";
 
 
 
-
-export function load({ params }:any) {
-	//const post = posts.find((post) => post.slug === params.slug);
-
-	if (!params.room_id || !params.room_type) throw error(404);
-  console.log("wow");
-	// start();
-	return {
-		room_type: params.room_type,
-		room_id: params.room_id,
-	};
-}

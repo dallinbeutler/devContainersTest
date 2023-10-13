@@ -1,7 +1,13 @@
-import { writable, type Invalidator, type Readable, type Subscriber, type Unsubscriber, readable } from 'svelte/store';
+import {  type Invalidator, type Readable, type Subscriber, type Unsubscriber, readable } from 'svelte/store';
 import { connect, StringCodec, MsgHdrsImpl } from "nats";
+import { tick } from 'svelte';
+type myMess = {
+  id:number,
+  content:string,
+  self:boolean
+}
 
-export const messages = writable ([
+export let Oldmessages = [
 	{ id: 1, content: 'Hello!', self: true },
 	{ id: 2, content: 'Hi there!', self: false },
 	{ id: 3, content: 'Hello!', self: true },
@@ -30,60 +36,43 @@ export const messages = writable ([
 	{ id: 42, content: 'Hi there!', self: false },
 	{ id: 43, content: 'Hi there!', self: false },    
 	// Add more dummy messages as needed
-]);
-export const foo = writable("bar")
+];
 
-// async function start(){	
-// 	console.log("started msg store")
-// 	const subject = 'hello'
-// 	try{
-// 		const nc = await connect({servers: `nats-service:4222`})
-// 		const sc = StringCodec();
-// 		console.log("msg store connected")
-// 		const sub = nc.subscribe(subject);
-// 		(async () => {
-// 				for await (const m of sub) {
-// 					let msg = sc.decode(m.data);
-// 					// msgs.update( (arr)=>{return [...arr,msg]} ) 
-// 					// msg_value = [...msg_value,[m.sid,msg]]
-// 					messages.update((arr) =>{return[...arr,{id:m.sid, content:msg, self:true}]})
-					
-// 					console.log(`[${sub.getProcessed()}]: ${msg}`);
-// 				}
-// 			})();					
-// 		console.log("returning sub")
-// 		return sub;
-// 	} catch (err) {
-// 		console.error("err");
-// 		console.error(err);
-// 	}	
-// };
-
-async function createFeed(){  
-  // const {subscribe, set, update} = writable([]);
-  console.log("started msg store")
-  const subject = 'hello'
-  try{
-    const nc = await connect({servers: `nats-service:4222`})
-    const sc = StringCodec();
-    console.log("msg store connected")
-    const sub = nc.subscribe(subject);
-    (async () => {
-        for await (const m of sub) {
-          let msg = sc.decode(m.data);
-          // msgs.update( (arr)=>{return [...arr,msg]} ) 
-          // msg_value = [...msg_value,[m.sid,msg]]
-          messages.update((arr) =>{return[...arr,{id:m.sid, content:msg, self:true}]})
-          
-          console.log(`[${sub.getProcessed()}]: ${msg}`);
-        }
-      })();					
-    console.log("returning sub")
-    
-    return sub.closed;
-  } catch (err) {
-    console.error("err");
-    console.error(err);
-  }
+type Message = {
+  id:number,
+  content:string,
+  self:boolean
 }
-export const feed = createFeed();
+let unsubscribe: () => void;
+export let messages :Array<Message>= [];
+// Unsubscribe from realtime messages
+export async function jsSub() {
+    // Get initial messages
+    console.log(`mountin`);
+const sc = StringCodec();
+const subject = 'hello'
+try{
+  const nc = await connect({servers: `nats-service:4222`})
+  unsubscribe = nc.close
+  const js = nc.jetstream();
+  const c = await js.consumers.get("hello")
+
+  while (true) {
+  console.log("waiting for messages");
+  const messageC = await c.consume({max_messages:1});
+  try {
+    for await (const m of messageC) {       
+      console.log(m.seq);
+      messages = [...messages, {id:m.sid, content:"",self:true}]
+      m.ack();
+      //    //console.log(`[${sub.getProcessed()}]: ${msg}`);
+    }
+  } catch (err) {
+    console.log(`consume failed: ${err}`);
+  }    
+}   
+}
+catch (err) {
+  console.error(err);
+} 
+}

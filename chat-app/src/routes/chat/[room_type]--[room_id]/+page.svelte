@@ -1,36 +1,64 @@
 <script lang="ts">
 	import topIcon from '$lib/images/format-vertical-align-top.png';
 	import botIcon from '$lib/images/format-vertical-align-bottom.png';
-  import {messages,foo,feed} from './natsStore'
-    import { readable,writable } from 'svelte/store';
-console.log("returning subb")
+  // import {messages,foo,feed} from './natsStore'
+  // import {createFeed,messages} from './natsStore'
+  import { connect, StringCodec } from "nats";
+  import { onDestroy, onMount } from 'svelte';  
 	export let data;
-
 	function scrollIntoView(){
 		document.getElementById('topAnchor')?.scrollIntoView({behavior:'smooth'});
 	}
 	function scrollBottom(){
 		document.getElementById('bottomAnchor')?.scrollIntoView({behavior:'smooth'});
 	}
-  
-  const times = writable([1]);
-  async function getRandomNumber() {
-    let i = 2
-    const interval = setInterval(()=>{
-      times.update((arr) =>{return[...arr, i++]})
-    }, 1000)
-    return function stop(){
-      clearInterval(interval);
+  type Message = {
+  id:number,
+  content:string,
+  self:boolean
+}
+let messages: string[]  = []
+async function subscribe() {
+    const response = await fetch('/chat/?type=' + data.room_type + '&room_id=' + data.room_id);
+    if (response.body != undefined){
+      const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
+      
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        console.log(value);
+        messages.push(value)
+        //triggers svelte recompute on an array if IDs aren't present
+        messages = messages
+      }
     }
-		
-	}
-  let promise = getRandomNumber()
+  }
+  onMount(subscribe);
+// async function subscribe() {
+//   try{
+//     const sc = StringCodec();
+    
+//     let messageReader = data.messages.pipeThrough(new TextDecoderStream() ).getReader()
+//     while (true) {
+//       const { value, done } = await messageReader.read();
+//       if (done) break;
+//       messages.push(value)
+//       messages = messages
+//     }
+//     }
+//   catch (err){
+//     console.error(err);
+//   }
+
+//   }
+  
+
+// onMount(subscribe);
 
 </script>
 
 <h1>{data.room_type }</h1>
 <h1>{data.room_id }</h1>
-<h1>{$foo}</h1>
 <div id="chat">
   <div id="chatHeader">
     <div class="level-left"></div>
@@ -68,20 +96,19 @@ console.log("returning subb")
 {:catch error}
 	<p style="color: red">{error.message}</p>
 {/await} -->
-  {#await feed}
-    <p>connecting...</p>
-  {:then}
-    {#each $messages as message }
-    <div class="msg-container {message.self ? 'msg-self' : 'msg-remote'}"> 
-      <div class="msg-box">
-        <div class="initials is-2"></div>
-        <div class="messages">{message.content}</div>
-      </div>
-    </div>
-    {/each}
-  {:catch} <p> sad day, problemo</p>
-  {/await}
-  <article id="bottomAnchor" />
+
+  
+{#each messages as message}
+<div class="msg-container" >
+<!-- {message.self ? 'msg-self' : 'msg-remote'}">  -->
+  <div class="msg-box">
+    <div class="initials is-2"></div>
+    <div class="messages">{message}</div>
+  </div>
+</div>
+{/each}
+
+<article id="bottomAnchor" />
 </section>
 <!-- ${ScrollAction} -->
 <footer id="chatFooter"
@@ -115,7 +142,7 @@ class="chat-input">
     float: left;
     box-shadow: 0 0 2px rgba(0,0,0,.12),0 2px 4px rgba(0,0,0,.24);
 }
-
+/* 
 .user-img {
     display: inline-block;
     border-radius: 50%;
@@ -178,7 +205,14 @@ class="chat-input">
 
 .msg-self .timestamp {
     text-align: right;
-}
+} */
+
+
+
+
+
+
+
 
 /* #main {
   overflow-y:auto;
