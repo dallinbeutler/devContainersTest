@@ -19,7 +19,7 @@
 }
 let messages: string[]  = []
 async function subscribe() {
-    const response = await fetch('/chat/?type=' + data.room_type + '&room_id=' + data.room_id);
+  const response = await fetch('/chat/?type=' + data.room_type + '&room_id=' + data.room_id);
     if (response.body != undefined){
       const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
       
@@ -32,6 +32,19 @@ async function subscribe() {
         messages = messages
       }
     }
+    // const response = await fetch('/chat/?type=' + data.room_type + '&room_id=' + data.room_id);
+    // if (response.body != undefined){
+    //   const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
+      
+    //   while (true) {
+    //     const { value, done } = await reader.read();
+    //     if (done) break;
+    //     console.log(value);
+    //     messages.push(value)
+    //     //triggers svelte recompute on an array if IDs aren't present
+    //     messages = messages
+    //   }
+    // }
   }
   onMount(subscribe);
 // async function subscribe() {

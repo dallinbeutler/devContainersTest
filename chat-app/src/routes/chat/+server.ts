@@ -5,7 +5,7 @@ import { connect, StringCodec, MsgHdrsImpl } from "nats";
 export function GET({ url}) {
   try {
     console.log(url);
-    console.log("get " ,url.searchParams.get('type'),' - ',url.searchParams.get('room_id'))
+    console.log("getting " ,url.searchParams.get('type'),' - ',url.searchParams.get('room_id'))
 
     const encoder = new TextEncoder();
 	  let readable = new ReadableStream({
@@ -21,7 +21,7 @@ export function GET({ url}) {
       const messages = await stream.consume()
 			for await (const m of messages) {				
 				let str = sc.decode(m.data)
-				console.log(`[${m.sid}]: ${str}`);
+				console.log(`[${m.seq}]: ${str}`); 
 				controller.enqueue(m.data);
 			}
 			console.log("subscription closed");
