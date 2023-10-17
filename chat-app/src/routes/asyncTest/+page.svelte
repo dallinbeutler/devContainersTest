@@ -1,24 +1,67 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+    import type { Readable } from 'svelte/store';
+    import type {Message} from './Message'
+  // src/routes/+page.svelte
+  import { source } from 'sveltekit-sse'
 
-  let result: string[] = [];
+  const connection = source('/asyncTest').onError(event => console.error({ event }))
+	const value = connection.select('message')
+	const transformed :Readable<Array<Message>> = value.transform(stream => {
+    let state = {
+      /** @type {Array<function(string):void>}*/
+      listeners: [],
+    }
+    const reader = stream.getReader()
+    const store = {
+      subscribe(callback:any) {
+        if (!state.listeners.includes(callback)) {
+          state.listeners.push(callback)
+					console.log("callback Registered");
+        }
 
-  async function subscribe() {
-    const response = await fetch('/asyncTest');
-    if (response.body != undefined){
-      const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        result.push(value)
-        result = result
+        return () => (state.listeners = state.listeners.filter(value => value !== callback))
+      },
+    }
+
+    const start = async function () {
+      let value :undefined| string = undefined
+      let myStore :Array<Message>= []
+      while (({ value } = await reader.read())) {
+				if (value != undefined){
+					console.log("update - ",value);
+          let m:Message = JSON.parse(value)
+					myStore = [...myStore,m]
+					state.listeners.forEach(callback => callback(myStore))
+				}
+
       }
     }
-  }
 
-  onMount(subscribe);
+    start()
+
+    return store
+	})
+
 </script>
+<!-- {$value} -->
 
-{#each result as str}
-  <p>{str}</p>
-{/each}
+<!-- {@html  $transformed } -->
+<!-- 
+ -->
+
+<!-- <button on:click={addToArray}>
+	Add item
+</button>
+
+-->
+{#if $transformed}
+{#each $transformed as item (item.id)}
+<p>
+  {item.author} said  {item.content}
+</p>
+{/each}	
+{/if}
+<!-- {#await transformed}
+{:then items} 
+	
+{/await} -->

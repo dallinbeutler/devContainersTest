@@ -8,7 +8,7 @@ export function GET({ url}) {
     console.log("getting " ,url.searchParams.get('type'),' - ',url.searchParams.get('room_id'))
 
     const encoder = new TextEncoder();
-	  let readable = new ReadableStream({
+	  let readable = new ReadableStream({    
 		async start(controller) {
 		try{
 			const sc = StringCodec();
@@ -32,8 +32,11 @@ export function GET({ url}) {
 			console.error(err);
 			throw err
 		}
+    },
+    cancel(){
+      //todo close gracefully...
     }
-	})
+	},new CountQueuingStrategy({highWaterMark:1}))
   
     return new Response(readable, {
       headers: {

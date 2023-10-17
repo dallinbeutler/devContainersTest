@@ -26,7 +26,9 @@ async function subscribe() {
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
+        console.log("--");
         console.log(value);
+        console.log("--");
         messages.push(value)
         //triggers svelte recompute on an array if IDs aren't present
         messages = messages

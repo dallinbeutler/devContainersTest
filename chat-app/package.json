@@ -19,11 +19,12 @@
     "svelte-check": "^3.4.3",
     "tslib": "^2.4.1",
     "typescript": "^5.0.0",
-    "vite": "^4.4.2"    
+    "vite": "^4.4.2"
   },
   "type": "module",
   "dependencies": {
     "nats": "^2.16.0",
-    "nats.ws": "^1.17.0"
+    "nats.ws": "^1.17.0",
+    "sveltekit-sse": "^0.3.6"
   }
 }
