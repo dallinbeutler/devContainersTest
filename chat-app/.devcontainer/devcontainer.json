@@ -19,7 +19,7 @@
 	//"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 	// "workspaceMount": "src=${localWorkspaceFolder},dst=/workspace,type=bind,consistency=cached",
 	"workspaceFolder": "/workspaces/my-app",
-	"forwardPorts": [5000,3000],
+	"forwardPorts": [80,3000],
 
 	"features": {
 		"ghcr.io/shyim/devcontainers-features/bun:0": {}

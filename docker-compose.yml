@@ -1,8 +1,14 @@
 version: '3.8'
-services:
+networks:
+  proxy_net:
+    driver: bridge 
 
+services:
   nats-service:
     image: nats:latest
+    networks: 
+      - proxy_net
+
     volumes:
       - ./nats/config/:/etc/nats
     command: "-c /etc/nats/nats.conf " 
@@ -13,11 +19,13 @@ services:
       - 9222:6222 # websockets
     # network_mode: host
 
-  bun-chat:
+  chat:
     build:
       context: ./chat-app
       dockerfile: Dockerfile    
     #container_name: bun-chat-dev
+    networks: 
+      - proxy_net
     volumes:
       #- ../../:workspaces:cached 
       # - .:/workspace:cached
@@ -27,11 +35,22 @@ services:
     environment:
       NODE_ENV: development
     ports:
-      - 5000:5000 #http front-end
-      - 3000:3000 #debug port
+      - 8086:80 #http front-end
+      # - 85:85 #http front-end
+      # - 3000:3000 #debug port
       # - 4223:4222 # nats port
     links:
       - nats-service
     #command: bun --bun run dev ./my-app/
-    command: /bin/sh -c "while sleep 1000; do :; done"
+    command: /bin/sh -c 'cd "/workspaces/my-app/" && bun --bun run dev'
+    #command: /bin/sh -c "while sleep 1000; do :; done"
+    labels:
+      - "traefik.enable=true"      
+      - "traefik.http.routers.chat.rule=PathPrefix(`/chat`)"
+      - "traefik.http.routers.chat.middlewares=authentik@docker" # middlewares-authentik@file  
+      # - "traefik.http.routers.chat.rule=Host(`app.localhost`)"
+      # - "traefik.http.services.chat.loadbalancer.server.port=85"
+      #traefik.port: 5000
+      #traefik.http.services.chat.port: 8080
+      ## Middlewares
     # network_mode: host
